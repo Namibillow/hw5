@@ -1,18 +1,88 @@
-<html>
-  <head><title>JSONを読み込む例</title></head>
-  <body>
-    路線：
-    <ul>
-      {% for line in network %}
-      <li> {{line.Name}}
-        <ul>
+
+{% extends "base.html" %}
+
+ {% block script %}
+   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.1/js/tempusdominus-bootstrap-4.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.1/css/tempusdominus-bootstrap-4.min.css" />
+   {% endblock %}
+
+{% block content %}
+<h2> TRAIN TRANSFER SEARCH </h2>
+
+<form method="post" action="/norikae">
+  <div class="form-row">
+    <div class="form-group col-md-2 col-xs-4">
+      <label for="sel1">FROM:</label>
+      <select name="start" class="form-control" id="sel1">
+        {% set count = {'value': 1} %}
+
+        {% for line in network %}
+          <option disabled> - {{line.Name}} - </option>
           {% for station in line["Stations"] %}
-          <li> {{station}} </li>
+            {% if count.value == selected_stations[0] %}
+              <option selected value="{{station}}">{{ station}}</option>
+
+            {%else %}
+              <option value="{{station}}">{{ station}}</option>
+            {% endif %}
+
+            {% if count.update({'value': (count.value + 1)}) %} {% endif %}
           {% endfor %}
-        </ul> 
-      </li>
-      {% endfor %}
-    </ul>
-  </body>
-</html>
-  
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group col-md-2 col-xs-4">
+      <label for="sel1">TO:</label>
+      <select  name="dest" class="form-control" id="sel1">
+        {% set count = {'value': 1} %}
+
+        {% for line in network %}
+          <option disabled> - {{line.Name}} - </option>
+          {% for station in line["Stations"] %}
+            {% if count.value == selected_stations[1] %}
+
+              <option selected value="{{station}}">{{ station}}</option>
+            {%else %}
+              <option value="{{station}}"> {{ station}}</option>
+            {% endif %}
+
+            {% if count.update({'value': (count.value + 1)}) %} {% endif %}
+          {% endfor %}
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+
+  <div class="form-group">
+    <label class="radio-inline"><input type="radio"  name="options" value="fastest" checked>Fastest</label>
+    <label class="radio-inline"><input type="radio" name="options" value="easiest">Easiest</label>
+  </div>
+
+
+  <div class="row">
+      <div class="col-sm-6">
+          <div class="form-group">
+              <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
+                  <input type="text" name="date" class="form-control datetimepicker-input" data-target="#datetimepicker1"/>
+                  <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
+                      <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <script type="text/javascript">
+          $(function () {
+              $('#datetimepicker1').datetimepicker();
+          });
+      </script>
+  </div>
+
+
+  <button type="submit" class="btn btn-primary">SEARCH</button>
+
+</form>
+{% endblock %}

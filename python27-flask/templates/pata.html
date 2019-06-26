@@ -1,12 +1,14 @@
-<body>
+{% extends "base.html" %}
+
+{% block content %}
 	<h1>With a few tweaks, I can パタトクカシーー!</h1>
-  <ul>
-    <li> a = {{request.args.get("a")}} </li>
-    <li> b = {{request.args.get("b")}} </li>
-    <li> a+b = {{pata}} </li>
-	<form>
-		<input type=text name=a>
-		<input type=text name=b>
+    {% if pata %}
+        <p>  Merging <b> {{word.word1}} </b>  and  <b>
+        {{word.word2}} </b> = {{pata}}</p>
+    {% endif %}
+	<form action="/pata" method="post">
+		<input type=text name=word1>
+		<input type=text name=word2>
 		<input type=submit>
 	</form>
-</body>
+{% endblock %}
