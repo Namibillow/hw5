@@ -1,0 +1,15 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+    {% if path %}
+        {% for p in path %}
+            <p> {{ p }}</p>
+        {% endfor %}
+    {% endif %}
+
+    {% if dist %}
+        <p> {{ dist }}</p>
+    {% endif %}
+
+{% endblock %}

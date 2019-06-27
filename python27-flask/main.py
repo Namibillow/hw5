@@ -25,9 +25,11 @@ outtages = json.loads(outtagesJson.decode('utf-8'))
 timeJson = urlfetch.fetch('http://fantasy-transit.appspot.com/schedules?format=json').content
 timeSchedule = json.loads(timeJson.decode('utf-8'))
 
-
+# if non-weighted graph
 connect_list = utils.create_pairs(network)
 graph = utils.build_graph(connect_list, outtages)
+
+# if weighted graph
 utils.process_timeJson(timeSchedule, graph)
 
 ############################
@@ -84,13 +86,15 @@ def norikae():
             return "It's same whyyyy"
         else:
             if choice == CHOICES[0]:
-                bfs.print_bfs(graph, start, dest)
+                path, dist = bfs.print_bfs(graph, start, dest)
+
             elif choice == CHOICES[1]:
                 pass
             else:
                 pass
 
-        return redirect('/')
+        # return redirect('/')
+        return render_template('result.html', path, dist, time)
     else:
         rand_num = [random.randint(1, NUM_STATIONS + 1) for _ in range(2)]
 
