@@ -11,6 +11,7 @@ import random
 
 import bfs
 import utils
+import dijkstra
 
 app = Flask(__name__)
 app.debug = True
@@ -25,17 +26,11 @@ outtages = json.loads(outtagesJson.decode('utf-8'))
 timeJson = urlfetch.fetch('http://fantasy-transit.appspot.com/schedules?format=json').content
 timeSchedule = json.loads(timeJson.decode('utf-8'))
 
-# if non-weighted graph
-connect_list = utils.create_pairs(network)
-graph = utils.build_graph(connect_list, outtages)
-
-# if weighted graph
-utils.process_timeJson(timeSchedule, graph)
 
 ############################
 #
 NUM_STATIONS = 122
-CHOICES = ['fastest', 'easiest']
+CHOICES = ['fastest', 'easiest', 'shortest']
 LINE_COLORS = {'東横線': '#fc8d62', '池上線': '#e78ac3', '大井町線': "#ffd92f", "山手線": '#66c2a5', "目黒線": '#8da0cb', "多摩川線": "#a6d854", "日比谷線": '#e5c494'}
 
 
@@ -79,22 +74,30 @@ def norikae():
         dest = request.form.get('dest')
         choice = request.form.get('options')
         date = request.form.get('date')
-        print(date)
+        input_time = date.split()[1].split(':')
+        # print(date)
+        # print(date.split()[1].split(':'))
 
         # CASE 1: if start and dest is the same:
         if start == dest:
             return "It's same whyyyy"
         else:
             if choice == CHOICES[0]:
+                # if non-weighted graph
+                connect_list = utils.create_pairs(network)
+                graph = utils.build_graph(connect_list, outtages)
                 path, dist = bfs.print_bfs(graph, start, dest)
 
             elif choice == CHOICES[1]:
                 pass
-            else:
-                pass
+            elif choice == CHOICES[2]:
+                graph = utils.build_weighted_graph(timeSchedule)
+                dijkstra.print_dfs(graph, start, dest)
+                schedules = utils.process_timeJson(timeSchedule)
+                path, dist = None, None
 
         # return redirect('/')
-        return render_template('result.html', path, dist, time)
+        return render_template('result.html', path=path, dist=dist, time=None)
     else:
         rand_num = [random.randint(1, NUM_STATIONS + 1) for _ in range(2)]
 

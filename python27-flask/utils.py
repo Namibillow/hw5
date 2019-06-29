@@ -35,52 +35,58 @@ def build_graph(connected, outtages=None):
     return graph
 
 
-def build_weighted_graph(connected, outtages=None, time):
+def build_weighted_graph(time):
     graph = Graph()
 
-    for shcedule in time['Schedules']
-        station = shcedule['Station']
-        line = shcedule['LineId']['Line']['Name']
+    for schedule in time['Schedules']:
+        station = schedule['Station']
+        line = schedule['LineId']['Line']['Name']
         curr_pos = None
-        for ind, neigh in enumerate(shcedule['LineId']['Line']['Stations']):
+        for ind, neigh in enumerate(schedule['LineId']['Line']['Stations']):
             if neigh == station:
                 curr_pos = ind
                 break
-        direction = shcedule['LineId']['Line']['Direction']
-        line_stations = shcedule['LineId']['Line']['Stations']
+        direction = schedule['LineId']['Direction']
+        line_stations = schedule['LineId']['Line']['Stations']
         neighbor = None
         if direction == 1:
             neighbor = line_stations[ind + 1] if ind < len(line_stations) - 1 else None
         else:
-            neighbor = line_station[ind - 1] if ind > 0 else None
+            neighbor = line_stations[ind - 1] if ind > 0 else None
 
         if neighbor:
-            connection = [(line, station), (line, neighbor), direction, weight]
+            # connection = [(line, station), (line, neighbor), direction]
 
-            schedule['Rows']
+            graph.addWeightedEdge((line, station), (line, neighbor), direction)
+
+    return graph
 
 
-def process_timeJson(time, graph):
-    #
+def process_timeJson(time):
+    """
+
+    """
+    station_dict = {}
     for schedule in time['Schedules']:
-        vertex = graph.verticies[schedule['Station']]
+        station_name = schedule['Station']
+        if station_name not in station_dict:
+            station_dict[station_name] = {}
+            line_name = schedule['LineId']['Line']['Name']
+            station_dict[station_name][line_name] = {}
 
-        time_schedule = [str(h['Hour']) + str(m) for h in schedule['Rows'] for m in h['Mins']]
-        print(schedule['Station'])
-        vertex.addTimeSchedule(schedule['Station']['Direction'], time_schedule)
+        direction = 'up' if schedule['LineId']['Direction'] >= 1 else 'down'
+
+        station_dict[station_name][line_name][direction] = {t["Hour"]: t["Mins"] for t in schedule['Rows']}
+
+    return station_dict
 
 
 class Vertex:
     def __init__(self, line, station):
         self.station = station  # .encode('utf-8')
         self.neighbors = []
-        self.up_neighbors = []
-        self.down_neighbors = []
         self.lines = [line]
-        self.cost = float('inf')
         self.dist = 0
-        self.time_up = []
-        self.time_down = []
 
     def addNeighbor(self, neigh):
         self.neighbors.append(neigh)
@@ -97,13 +103,6 @@ class Vertex:
     def getStationInfo(self):
         return self.station, self.lines
 
-    def addTimeSchedule(self, sign, time):
-        pass
-        # if sign == 1:
-        #     self.time_up.append()
-        # else:
-        #     self.time_down.append()
-
 
 class Graph:
     def __init__(self):
@@ -119,7 +118,11 @@ class Graph:
             self.numVerticies += 1
             self.verticies[station] = Vertex(line, station)
 
-    def addWeightedEdge(self, from_info, to_info, weight, line):
+    def addWeightedEdge(self, from_info, to_info, direction, weight=float('inf')):
+        self.addVertex(*from_info)
+        self.addVertex(*to_info)
+
+        self.verticies[from_info[1]].addNeighbor((self.verticies[to_info[1]], from_info[0], direction, weight))
 
     def addEdge(self, from_info, to_info):
         """
